@@ -24,7 +24,7 @@ $("#add-Train-btn").on( "click", function(event) {
   var ftrain = moment($("#ftrain-input").val().trim()) .format("HH:mm - military time");
   var Tfrequency = $("#frequency-input").val().trim();
 
-  // Creates local "temporary" object for holding employee data
+  // Creates local "temporary" object for holding trains data
   var newTrain = {
     name: trainName,
     destination: TDestination,
@@ -64,15 +64,47 @@ database.ref().on("child_added", function(childSnapshot) {
   console.log(ftrain);
   console.log(Tfrequency);
 
-    // Prettify the employee start
-    var ftraunpretty = moment.unix(ftrain).format("HH:mm - military time");
+
+    // Assumptions
+
+    var Tfrequency;
+
+    // Trains start at 5-30
+    var firstTime = "05:30";
+
+    // First Time (pushed back 1 year to make sure it comes before current time)
+    var firstTimeConverted = moment(firstTime, "HH:mm").subtract(1, "years");
+    console.log(firstTimeConverted);
+
+    // Current Time
+    var currentTime = moment();
+    console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+
+    // Difference between the times
+    var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+    console.log("DIFFERENCE IN TIME: " + diffTime);
+
+    // Time apart (remainder)
+    var tRemainder = diffTime % Tfrequency;
+    console.log(tRemainder);
+
+    // Minutes Until Train
+    var tMinutesTillTrain = Tfrequency - tRemainder;
+    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+
+    // Next Train
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+    var arrivalnext= moment(nextTrain).format("hh:mm");
+    console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
 
       // Create the new row
   var newRow = $("<tr>").append(
     $("<td>").text(trainName),
     $("<td>").text(TDestination),
-    $("<td>").text(ftraunpretty),
     $("<td>").text(Tfrequency),
+    $("<td>").text(arrivalnext),
+    $("<td>").text(tMinutesTillTrain),
+
   );
   // Append the new row to the table
   $("#Train-table > tbody").append(newRow);
